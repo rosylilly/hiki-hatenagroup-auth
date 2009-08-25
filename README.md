@@ -3,6 +3,9 @@
 
 created at 2009-08-25.
 
+## author
+- rosylilly
+- sorah
 
 ## install
 
