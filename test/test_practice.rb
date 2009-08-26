@@ -14,7 +14,7 @@ def check_exception
     end
 end
 def check_type
-    convert_ary_to_hash([1,2,3,4]).kind_of?(hash)
+    convert_ary_to_hash([1,2,3,4]).kind_of?(Hash)
 end
 p check_exception
 p check_type
