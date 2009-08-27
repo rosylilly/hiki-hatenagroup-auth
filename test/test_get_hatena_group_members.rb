@@ -9,6 +9,6 @@ class TestGetHatenaGroupMembers < Test::Unit::TestCase
     end
 
     def test_type
-        assert_kind_of(String,get_hatena_group_members('generation1991'))
+        assert_kind_of(Array,get_hatena_group_members('generation1991'))
     end
 end
