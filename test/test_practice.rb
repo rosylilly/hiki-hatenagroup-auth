@@ -1,3 +1,5 @@
+require 'lib/misc.rb'
+
 class TestConvertAryToHash < Test::Unit::TestCase
     def test_exception
         assert_raise(ArgumentError) do
