@@ -1,4 +1,4 @@
-require 'lib/hatenagroup_auth'
+require 'auth/hatenagroup_auth'
 
 class TestHatenaGroupAuth < Test::Unit::TestCase
   def setup
