@@ -32,7 +32,7 @@ class TestHatenaGroupAuth < Test::Unit::TestCase
   end
 
   def test_user
-    user = @obj.cert('cert')
+    user = @obj.get_user('cert')
 
     assert_instance_of?(String, user.name)
     assert_instance_of?(String, user.image)
