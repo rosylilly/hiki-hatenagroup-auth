@@ -16,6 +16,7 @@ class TestHatenaGroupAuth < Test::Unit::TestCase
 
   def test_generater
     assert_instance_of?(String, @obj.login_url)
+    assert(@obj.login_url(:var => 'test') =~ /var=test/)
   end
 
   def test_members
@@ -24,5 +25,17 @@ class TestHatenaGroupAuth < Test::Unit::TestCase
 
   def test_member?
     assert(@obj.member?('rosylilly'))
+  end
+
+  def test_get_user
+    assert_instance_of?(HatenaGroup::User, @obj.cert('cert'))
+  end
+
+  def test_user
+    user = @obj.cert('cert')
+
+    assert_instance_of?(String, user.name)
+    assert_instance_of?(String, user.image)
+    assert_instance_of?(String, user.thumbnail)
   end
 end
