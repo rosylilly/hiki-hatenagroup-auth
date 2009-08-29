@@ -1,4 +1,4 @@
-# auth_hatena.rb
+# hatena-group-auth.rb
 # Copyright (C) rosylilly and sorah
 
 require 'hiki/session'
