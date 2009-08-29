@@ -17,6 +17,7 @@ def hatena_group_instance
     end
 end
 
+
 def auth?
     return true if @user && !@conf.password.empty?
     return true if @conf['hatega.api_key'].empty?
