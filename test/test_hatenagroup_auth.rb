@@ -17,4 +17,12 @@ class TestHatenaGroupAuth < Test::Unit::TestCase
   def test_generater
     assert_instance_of?(String, @obj.login_url)
   end
+
+  def test_members
+    assert_instance_of?(Array, @obj.members)
+  end
+
+  def test_member?
+    assert(@obj.member?('rosylilly'))
+  end
 end
