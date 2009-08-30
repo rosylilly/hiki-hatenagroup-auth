@@ -4,12 +4,15 @@
 require 'hiki/session'
 require 'auth/hatenagroup_auth'
 
-@conf['hatega.api_key'] ||= ''
-@conf['hatega.sec_key'] ||= ''
-@conf['hatega.group_name'] || = ''
-@conf['hatega.login_message'] ||= 'はてなグループにログイン'
+@conf['hatega.api_key'] ||=''
+@conf['hatega.sec_key'] ||=''
+@conf['hatega.group_name'] ||=''
+@conf['hatega.login_message'] ||='はてなグループにログイン'
+
 def hatena_group_instance
-    return "Setting first please." if @conf['hatega.api_key'].empty? || @conf['hatega.sec_key'].empty? || @conf['hatega.group_name'].empty?
+    if @conf['hatega.api_key'].empty? || @conf['hatega.sec_key'].empty? || @conf['hatega.group_name'].empty?
+        return "Setting first please." 
+    end
     begin
         return HatenaGroup.new(@conf['hatega.group_name'],@conf['hatega.api_key'],@conf['hatega.sec_key'])
     rescue HatenaGroup::GroupNotFound
