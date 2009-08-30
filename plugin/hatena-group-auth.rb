@@ -73,6 +73,10 @@ def hatega_logout_url
     "#{@conf.cgi_name}?c=plugin;plugin=auth_hatega;type=out"
 end
 
+def hatega_callback_url
+    "http://#{@cgi.http_host}#{@cgi.request_uri}"
+end
+
 add_body_enter_proc do
     return "" if @conf['hatega.api_key'].empty? || @conf['hatega.sec_key'].empty? || @conf['hatega.group_name'].empty?
 
