@@ -7,7 +7,7 @@ require "auth/hatenagroup_auth"
 @conf["hatega.api_key"] ||=""
 @conf["hatega.sec_key"] ||=""
 @conf["hatega.group_name"] ||=""
-@conf["hatega.login_message"] ||="はてなグループにログイン"
+@conf["hatega.login_message"] ||="login to hatena-group"
 
 def hatena_group_instance
     if (@conf["hatega.api_key"].empty? || @conf["hatega.sec_key"].empty? || @conf["hatega.group_name"].empty?)
@@ -66,10 +66,10 @@ def auth_hatega
     end
 end
 
-def hatega_login_url(param = {})
+def hatega_login_url(page_name)
     ha = hatena_group_instance
     return nil unless ha.kind_of?(HatenaGroup)
-    return ha.login_url(param)
+    return ha.login_url(:p => page_name)
 end
 
 def hatega_logout_url
@@ -77,48 +77,43 @@ def hatega_logout_url
 end
 
 def hatega_callback_url
-    "http://#{@cgi.http_host}#{@cgi.request_uri}"
+    "http://#{@cgi.host}#{ENV["REQUEST_URI"].sub(/\?.+$/,"")}?c=plugin;plugin=auth_hatega"
 end
 
-add_body_enter_proc do
-    return "" if @conf["hatega.api_key"].empty? || @conf["hatega.sec_key"].empty? || @conf["hatega.group_name"].empty?
 
-    unless auth?
-        <<-HTML
-        <div class="hello">
-        #{@conf["hatega.login_message"].gsub(/ログイン/,"<a href=""+hatega_login_url(:p => @page)+"">ログイン</a>").gsub(/groupname/,CGI::escapeHTML(@conf["hatega.group_name"]))}
-        </div>
-        HTML
+add_body_enter_proc do
+    if @conf["hatega.api_key"].empty? || @conf["hatega.sec_key"].empty? || @conf["hatega.group_name"].empty?
+        "<div class=\"hello\">Setting first</div>"
+    elsif !auth?
+       "<div class=\"hello\">#{@conf["hatega.login_message"].sub(/login/,"<a href=\""+hatega_login_url(@page)+"\">login</a>").sub(/groupname/,CGI::escapeHTML(@conf["hatega.group_name"]))}</div>"
     elsif user = auth_user
         @user = user
-        <<-HTML
-        <div class="hello">
-        こんにちは、#{@user.escapeHTML}さん - <a href="#{hetaga_logout_url}">ログアウト</a>
-        </div>
-        HTML
+        "<div class=\"hello\">Hello #{@user.escapeHTML} - <a href\"#{hatega_logout_url}\">logout</a></div>"
     end
 end
 
-add_conf_proc( "auth_hatega", "はてな認証" ) do
+add_conf_proc( "auth_hatega", "Hatena group auth" ) do
 	if @mode == "saveconf" then
-		@conf["hatena.api_key"] = @cgi.params["hatena.api_key"][0]
-		@conf["hatena.secret_key"] = @cgi.params["hatena.secret_key"][0]
+		@conf["hatega.api_key"] = @cgi.params["hatega.api_key"][0]
+		@conf["hatega.sec_key"] = @cgi.params["hatega.sec_key"][0]
+        @conf["hatega.group_name"] = @cgi.params["hatega.group_name"][0]
+        @conf["hatega.login_message"] = @cgi.params["hatega.login_message"][0]
 	end
 	<<-HTML
-    <h3 class="subtitle">はてなグループ名</h3>
-    <p>はてなグループ名を入力してください。グループ名はURLの http://これ.g.hatena.ne.jp/ です</p>
+    <h3 class="subtitle">hatena-group name</h3>
+    <p>Input hatena-group name.  http:// *group-name* .g.hatena.ne.jp/</p>
     <p><input name="hatega.group_name" size="50" value="#{CGI::escapeHTML(@conf["hatega.group_name"])}"></p>
-    <h3 class="subtitle">ログインメッセージ</h3>
-    <p>ログインしていないときに表示するメッセージを設定します。</p>
-    <p>なお、ログインはログイン画面へのリンク、groupnameはグループ名に置換されます。</p>
+    <h3 class="subtitle">header message</h3>
+    <p>Input not-login message</p>
+    <p>login => login link groupname => group-name</p>
     <p><input name="hatega.login_message" size="50" value="#{CGI::escapeHTML(@conf["hatega.login_message"])}"></p>
-	<h3 class="subtitle">API キー</h3>
-	<p>API キーを指定します。API キーは、<a href="http://auth.hatena.ne.jp/">はてな認証APIのページ</a>で取得できます。</p>
-    <p>はてな認証API設定のコールバックURLは、「#{CGI::escape(hatega_callback_uri)}」を指定してください。</p>
+	<h3 class="subtitle">API key</h3>
+	<p>api key. <a href="http://auth.hatena.ne.jp/">auth.hatena.ne.jp page</a></p>
+    <p>callback url #{CGI::escapeHTML(hatega_callback_url)}</p>
 	<p><input name="hatega.api_key" size="50" value="#{CGI::escapeHTML(@conf["hatega.api_key"])}"></p>
-	<h3 class="subtitle">秘密鍵</h3>
-	<p>秘密鍵を指定します。秘密鍵は、<a href="http://auth.hatena.ne.jp/">はてな認証APIのページ</a>で取得できます。</p>
-    <p>APIのコールバックURLは、「#{CGI::escape(hatega_callback_uri)}」を指定してください。</p>
+	<h3 class="subtitle">secret key</h3>
+	<p>secret key <a href="http://auth.hatena.ne.jp/">auth.hatena.ne.jp page</a></p>
+    <p>Callback url #{CGI::escapeHTML(hatega_callback_url)}</p>
 	<p><input name="hatega.sec_key" size="50" value="#{CGI::escapeHTML(@conf["hatega.sec_key"])}"></p>
 	HTML
 end

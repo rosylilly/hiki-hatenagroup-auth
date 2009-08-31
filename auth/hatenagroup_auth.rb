@@ -1,7 +1,7 @@
 require 'open-uri'
 require 'uri'
 require 'rexml/document'
-
+require 'digest/md5'
 class HatenaGroup
   def initialize(group_id, api_key, secret_key)
     @group_id = group_id
@@ -20,20 +20,20 @@ class HatenaGroup
   end
 
   def api_sig(hash)
-    "#{@secret_key}" + hash.to_a.sort{|a,b| a[0] <=> b[0] }.map{|k,v| "#{k.to_s}#{v.to_s}"}.to_s
+    Digest::MD5.hexdigest("#{@secret_key}" + hash.to_a.sort{|a,b| a[0].to_s <=> b[0].to_s }.map{|k,v| "#{k.to_s}#{v.to_s}"}.to_s)
   end
 
   def hash_to_query(hash)
-    hash.to_a.map{|k,v| "#{URI.escape(k)}=#{URI.escape(v)}" }.join('&')
+    hash.to_a.map{|k,v| "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}" }.join('&')
   end
 
   def login_url(hash=nil)
     raise ArgumentError if hash.nil? and !hash.instance_of?(Hash)
     if hash.nil?
-      "http://auth.hatena.ne.jp/auth?api_key=#{@api_key}&api_sig=#{api_sig(:api_key => @api_key)}"
+    "http://auth.hatena.ne.jp/auth?api_key=#{@api_key}&api_sig=#{api_sig(:api_key => @api_key)}"
     else
-      "http://auth.hatena.ne.jp/auth?api_key=#{@api_key}&#{hash_to_query(hash)}"+
-      "&api_sig=#{api_sig({:api_key => @api_key} + hash)}"
+        hash[:api_key] = @api_key
+"http://auth.hatena.ne.jp/auth?#{hash_to_query(hash)}"+"&api_sig=#{api_sig(hash)}"
     end
   end
 
@@ -46,10 +46,10 @@ class HatenaGroup
       return false
     end
     elms = xml.elements
-    if elms['has_error'].text == 'true'
+    if elms['/response/has_error'].text == 'true'
       return false
     end
-    return User.new(:name => elms['name'].text, :image => elms['image_url'].text, :thumbnail => elms['thumbnail'].text)
+    return User.new(:name => elms['/response/user/name'].text, :image => elms['/response/user/image_url'].text, :thumbnail => elms['/response/user/thumbnail_url'].text)
   end
 
   class User
