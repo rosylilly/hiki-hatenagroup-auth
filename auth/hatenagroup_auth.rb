@@ -52,6 +52,29 @@ class HatenaGroup
     return User.new(:name => elms['/response/user/name'].text, :image => elms['/response/user/image_url'].text, :thumbnail => elms['/response/user/thumbnail_url'].text)
   end
 
+  def members
+      html = open("http://#{@group_id}.g.hatena.ne.jp/diarylist") do |f|
+      if f.base_uri.to_s == "http://g.hatena.ne.jp/"
+              raise HatenaGroup::GroupNotFound,"hatena group \"#{@group_id}\" not exist"
+      else
+              f.read
+      end
+      end
+      ary = []
+      ary << html.scan(/<a href="\/(\w+)\/"><img class="hatena-id-icon/)
+  
+      while /<a rel="next" href="diarylist\?of=([0-9]+)" class="next">/ =~ html
+          html = open("http://#{@group_id}.g.hatena.ne.jp/diarylist?of=#{$1}"){|f|f.read}
+          ary << html.scan(/<a href="\/(\w+)\/"><img class="hatena-id-icon/)
+      end
+      return ary.flatten
+  end
+  
+  def member?(id)
+      return false if self.members.index(id).nil?
+      return true
+  end
+
   class User
     def initialize(hash)
       @name = hash[:name]

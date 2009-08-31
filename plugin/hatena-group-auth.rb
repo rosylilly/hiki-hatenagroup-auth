@@ -50,10 +50,10 @@ def auth_hatega
         user = ha.get_user(cert)
         if user
             if ha.member?(user.name)
-                session = Session::New(@conf)
+                session = Session::new(@conf)
                 session.user = user.name
                 session.save
-                self.cookies << CGI::Cookies.new( "auth_hatega_session_id", session.session_id )
+                self.cookies << CGI::Cookie.new( "auth_hatega_session_id", session.session_id )
             else
                 session.delete if session
                 return "you are not a member of the hatena-group #{CGI::escapeHTML(@conf["hatega.group_name"])}."
@@ -73,11 +73,11 @@ def hatega_login_url(page_name)
 end
 
 def hatega_logout_url
-    "#{@conf.cgi_name}?c=plugin;plugin=auth_hatega;type=out"
+    @conf.cgi_name+"?c=plugin&plugin=auth_hatega&type=out"
 end
 
 def hatega_callback_url
-    "http://#{@cgi.host}#{ENV["REQUEST_URI"].sub(/\?.+$/,"")}?c=plugin;plugin=auth_hatega"
+    "http://#{@cgi.host}#{ENV["REQUEST_URI"].sub(/\?.+$/,"")}?c=plugin&plugin=auth_hatega"
 end
 
 
@@ -88,7 +88,7 @@ add_body_enter_proc do
        "<div class=\"hello\">#{@conf["hatega.login_message"].sub(/login/,"<a href=\""+hatega_login_url(@page)+"\">login</a>").sub(/groupname/,CGI::escapeHTML(@conf["hatega.group_name"]))}</div>"
     elsif user = auth_user
         @user = user
-        "<div class=\"hello\">Hello #{@user.escapeHTML} - <a href\"#{hatega_logout_url}\">logout</a></div>"
+        "<div class=\"hello\">Hello #{@user.escapeHTML} - <a href=\"#{hatega_logout_url}\">logout</a></div>"
     end
 end
 
